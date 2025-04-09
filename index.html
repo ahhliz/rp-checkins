@@ -18,11 +18,13 @@
     }
     .container {
       text-align: center;
+      width: 90%;
       max-width: 400px;
       padding: 2rem;
       border-radius: 16px;
       background-color: #1e293b;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      box-sizing: border-box;
     }
     img.logo {
       width: 160px;
@@ -41,20 +43,22 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       margin: 0.5rem 0;
+      box-sizing: border-box;
     }
     input {
       background-color: #f8fafc;
       color: #0f172a;
     }
     button {
-      background-color: #38bdf8;
-      color: #0f172a;
+      background-color: #ff5f5a;
+      color: #ffffff;
       font-weight: 600;
       border: none;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
     button:hover {
-      background-color: #0ea5e9;
+      background-color: #e04e4b;
     }
     #checked-in {
       margin-top: 2rem;
@@ -66,14 +70,14 @@
 <body>
   <div class="container">
     <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance" class="logo">
-    <h2>Check In</h2>
+    <h2 id="heading">Check In</h2>
     <div id="form-section">
       <input type="text" id="name" placeholder="Your Name" /><br />
       <input type="email" id="email" placeholder="Your Email" /><br />
-      <button onclick="saveClientInfo()">Save Info & Check In</button>
+      <button onclick="saveClientInfo()">Book My Free Discovery Call</button>
     </div>
     <div id="checked-in" style="display:none;">
-      <p>✅ Checked in! Have a great workout!</p>
+      <p id="checked-in-message">✅ Checked in! Have a great workout!</p>
     </div>
   </div>
 
@@ -81,7 +85,12 @@
     const webhookURL = "https://hook.eu2.make.com/dpflpcacoc2kw50np41jxui2lrx30hl8";
 
     const urlParams = new URLSearchParams(window.location.search);
-    const trainer = urlParams.get("trainer") || "Unknown";
+    const trainer = urlParams.get("trainer") || "your trainer";
+
+    const heading = document.getElementById("heading");
+    const checkedInMsg = document.getElementById("checked-in-message");
+    heading.textContent = `Check in with ${trainer}`;
+    checkedInMsg.textContent = `✅ Checked in! Enjoy your session with ${trainer}!`;
 
     const savedName = localStorage.getItem("clientName");
     const savedEmail = localStorage.getItem("clientEmail");
