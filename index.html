@@ -3,74 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trainer Check-In</title>
+  <title>Resolve Performance Check-In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 2em; text-align: center; }
-    input, button { padding: 0.5em; margin: 0.5em; font-size: 1em; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      text-align: center;
+      max-width: 400px;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+    img.logo {
+      width: 160px;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+    }
+    button {
+      background-color: #0f172a;
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1e293b;
+    }
+    #checked-in {
+      margin-top: 2rem;
+      font-weight: 500;
+      color: green;
+    }
   </style>
 </head>
 <body>
-  <h2>Check In</h2>
-  <div id="form-section">
-    <input type="text" id="name" placeholder="Your Name" /><br />
-    <input type="email" id="email" placeholder="Your Email" /><br />
-    <button onclick="saveClientInfo()">Save Info & Check In</button>
+  <div class="container">
+    <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance" class="logo">
+    <h2>Check In</h2>
+    <div id="form-section">
+      <input type="text" id="name" placeholder="Your Name" /><br />
+      <input type="email" id="email" placeholder="Your Email" /><br />
+      <button onclick="saveClientInfo()">Save Info & Check In</button>
+    </div>
+    <div id="checked-in" style="display:none;">
+      <p>✅ Checked in! Have a great workout!</p>
+    </div>
   </div>
-  <div id="checked-in" style="display:none;">
-    <p>✅ Checked in! Have a great workout!</p>
-  </div>
 
-<script>
-  const webhookURL = "https://hook.eu2.make.com/dpflpcacoc2kw50np41jxui2lrx30hl8";
+  <script>
+    const webhookURL = "https://hook.eu2.make.com/dpflpcacoc2kw50np41jxui2lrx30hl8";
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const trainer = urlParams.get("trainer") || "Unknown";
+    const urlParams = new URLSearchParams(window.location.search);
+    const trainer = urlParams.get("trainer") || "Unknown";
 
-  const savedName = localStorage.getItem("clientName");
-  const savedEmail = localStorage.getItem("clientEmail");
+    const savedName = localStorage.getItem("clientName");
+    const savedEmail = localStorage.getItem("clientEmail");
 
-  if (savedName && savedEmail) {
-    checkIn(savedName, savedEmail);
-  } else {
-    document.getElementById("form-section").style.display = "block";
-  }
+    if (savedName && savedEmail) {
+      checkIn(savedName, savedEmail);
+    } else {
+      document.getElementById("form-section").style.display = "block";
+    }
 
-  function saveClientInfo() {
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    if (!name || !email) return alert("Please fill in both fields.");
+    function saveClientInfo() {
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      if (!name || !email) return alert("Please fill in both fields.");
 
-    localStorage.setItem("clientName", name);
-    localStorage.setItem("clientEmail", email);
+      localStorage.setItem("clientName", name);
+      localStorage.setItem("clientEmail", email);
 
-    checkIn(name, email);
-  }
+      checkIn(name, email);
+    }
 
-  function checkIn(name, email) {
-    const now = new Date();
-    const options = { timeZone: "Australia/Brisbane" };
+    function checkIn(name, email) {
+      const now = new Date();
+      const options = { timeZone: "Australia/Brisbane" };
+      const date = now.toLocaleDateString("en-AU", options);
+      const time = now.toLocaleTimeString("en-AU", { ...options, hour: "2-digit", minute: "2-digit" });
 
-    const date = now.toLocaleDateString("en-AU", options); // DD/MM/YYYY
-    const time = now.toLocaleTimeString("en-AU", { ...options, hour: "2-digit", minute: "2-digit" }); // HH:mm
-
-    fetch(webhookURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        date,
-        time,
-        trainer,
-        client: name,
-        email
+      fetch(webhookURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date,
+          time,
+          trainer,
+          client: name,
+          email
+        })
       })
-    })
-    .then(() => {
-      document.getElementById("form-section").style.display = "none";
-      document.getElementById("checked-in").style.display = "block";
-    })
-    .catch((err) => alert("Check-in failed. Try again."));
-  }
-</script>
-
+      .then(() => {
+        document.getElementById("form-section").style.display = "none";
+        document.getElementById("checked-in").style.display = "block";
+      })
+      .catch((err) => alert("Check-in failed. Try again."));
+    }
+  </script>
 </body>
 </html>
