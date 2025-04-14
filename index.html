@@ -102,12 +102,21 @@
     </div>
   </div>
 
- <script>
+<script>
   const form = document.querySelector("#checkinForm");
   const messageBox = document.querySelector("#responseMessage");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    const today = new Date().toISOString().split("T")[0]; // e.g. "2025-04-14"
+    const lastCheckIn = localStorage.getItem("lastCheckInDate");
+
+    if (lastCheckIn === today) {
+      messageBox.textContent = "You've already checked in today!";
+      messageBox.style.color = "#ff6961";
+      return;
+    }
 
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
@@ -124,19 +133,20 @@
       const result = await response.json();
 
       messageBox.textContent = result.message || "You're all checked in!";
-      messageBox.style.color = result.message?.includes("already") ? "#ff6961" : "#253327";
+      messageBox.style.color = "#253327";
 
-      if (!result.message?.includes("already")) {
-        setTimeout(() => {
-          window.location.href = "https://resolveperformance.com.au/";
-        }, 5000);
-      }
+      localStorage.setItem("lastCheckInDate", today);
+
+      setTimeout(() => {
+        window.location.href = "https://resolveperformance.com.au/";
+      }, 5000);
     } catch (err) {
       messageBox.textContent = "Something went wrong. Please try again.";
       messageBox.style.color = "#ff6961";
     }
   });
 </script>
+
 
 </body>
 </html>
