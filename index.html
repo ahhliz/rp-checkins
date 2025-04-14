@@ -103,49 +103,62 @@
   </div>
 
 <script>
-  const form = document.querySelector("#checkinForm");
-  const messageBox = document.querySelector("#responseMessage");
+  async function saveClientInfo() {
+    const name = document.querySelector("#name").value.trim();
+    const email = document.querySelector("#email").value.trim();
+    const trainer = new URLSearchParams(window.location.search).get("trainer") || "Unknown";
+    const firstSession = document.querySelector("#first-session").checked;
+    const messageBox = document.querySelector("#checked-in-message");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    if (!name || !email) {
+      alert("Please enter your name and email.");
+      return;
+    }
 
-    const today = new Date().toISOString().split("T")[0]; // e.g. "2025-04-14"
+    const today = new Date().toISOString().split("T")[0];
     const lastCheckIn = localStorage.getItem("lastCheckInDate");
 
     if (lastCheckIn === today) {
       messageBox.textContent = "You've already checked in today!";
-      messageBox.style.color = "#ff6961";
+      document.querySelector("#form-section").style.display = "none";
+      document.querySelector("#checked-in").style.display = "block";
       return;
     }
 
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+    const payload = {
+      name,
+      email,
+      trainer,
+      firstSession: firstSession ? "Yes" : "No"
+    };
 
     try {
       const response = await fetch("https://hook.eu2.make.com/dpflpcacoc2kw50np41jxui2lrx30hl8", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload)
       });
 
       const result = await response.json();
 
-      messageBox.textContent = result.message || "You're all checked in!";
-      messageBox.style.color = "#253327";
-
       localStorage.setItem("lastCheckInDate", today);
+      document.querySelector("#form-section").style.display = "none";
+      document.querySelector("#checked-in").style.display = "block";
+      messageBox.textContent = result.message || "✅ You're all checked in. You can now close this tab or relax — we'll take it from here.";
 
       setTimeout(() => {
         window.location.href = "https://resolveperformance.com.au/";
       }, 5000);
-    } catch (err) {
+    } catch (error) {
       messageBox.textContent = "Something went wrong. Please try again.";
-      messageBox.style.color = "#ff6961";
+      document.querySelector("#form-section").style.display = "none";
+      document.querySelector("#checked-in").style.display = "block";
     }
-  });
+  }
 </script>
+
 
 
 </body>
