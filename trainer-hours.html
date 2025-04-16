@@ -90,8 +90,11 @@
   fetch("https://hook.eu2.make.com/xt1tstwqfqiz44onrsuhdjhh4xl8lip4")
     .then(res => res.json())
     .then(data => {
+      // Flatten the array of objects [{trainers:["Jo"]}, ...] into ["Jo", "Nathan", ...]
+      const trainers = data.map(item => item.trainers[0]);
+
       const dropdown = document.getElementById("trainerName");
-      data.trainers.forEach(trainer => {
+      trainers.forEach(trainer => {
         const opt = document.createElement("option");
         opt.value = trainer;
         opt.textContent = trainer;
