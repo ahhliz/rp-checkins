@@ -89,13 +89,36 @@
     <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance" class="logo">
     <h2 id="heading">CHECK IN</h2>
     <div id="form-section">
-      <input type="text" id="name" placeholder="Your Name" /><br />
+      <select id="name">
+        <option value="">Select your name</option>
+      </select><br />
       <input type="email" id="email" placeholder="Your Email" /><br />
       <label style="display: flex; align-items: center; margin: 0.5rem 0; color: #dfd8ce; font-size: 0.95rem;">
         <input type="checkbox" id="first-session" style="width: auto; margin-right: 0.5rem;" />
         Is this your first session with your trainer?
       </label>
       <button onclick="saveClientInfo()">Save Info & Check In</button>
+
+      <script>
+  async function loadClientNames() {
+    try {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyQ-Z3470JQtpYqQ1iS1RnmhXOeBn--fnQhXnO0YUAtoSqdJHZbv4nMPVNGt3d0G3_w-A/exec");
+      const names = await res.json();
+      const dropdown = document.getElementById("name");
+      names.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        dropdown.appendChild(option);
+      });
+    } catch (e) {
+      console.error("Failed to load names:", e);
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", loadClientNames);
+</script>
+
     </div>
     <div id="checked-in" style="display:none;">
       <p id="checked-in-message">✅ You're all checked in. You can now close this tab or relax — we'll take it from here.</p>
