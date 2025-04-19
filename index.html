@@ -47,14 +47,24 @@
       margin-bottom: 1rem;
       color: #dfd8ce;
     }
-    input, button {
+    input, select, button {
       width: 100%;
       padding: 0.85rem;
       font-size: 1rem;
       border-radius: 20px;
       margin: 0.5rem 0;
       box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
     }
+    select {
+      border: 1px solid #ccc;
+      background-color: #f8fafc;
+      color: #253327;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+    
     input {
       border: 1px solid #ccc;
       background-color: #f8fafc;
@@ -89,9 +99,10 @@
     <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance" class="logo">
     <h2 id="heading">CHECK IN</h2>
     <div id="form-section">
-      <select id="name">
-        <option value="">Select your name</option>
-      </select><br />
+    <select id="name" class="styled-input">
+      <option value="">Select your name</option>
+    </select><br />
+
       <input type="email" id="email" placeholder="Your Email" /><br />
       <label style="display: flex; align-items: center; margin: 0.5rem 0; color: #dfd8ce; font-size: 0.95rem;">
         <input type="checkbox" id="first-session" style="width: auto; margin-right: 0.5rem;" />
