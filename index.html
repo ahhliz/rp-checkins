@@ -132,7 +132,7 @@
 
     </div>
     <div id="checked-in" style="display:none;">
-      <p id="checked-in-message">✅ You're all checked in. You can now close this tab or relax — we'll take it from here.</p>
+      <p id="checked-in-message">✅ You're all checked in. You can now close this tab — we'll take it from here.</p>
     </div>
   </div>
 
@@ -178,7 +178,7 @@
       localStorage.setItem("lastCheckInDate", today);
       document.querySelector("#form-section").style.display = "none";
       document.querySelector("#checked-in").style.display = "block";
-      messageBox.textContent = "✅ You're all checked in. You can now close this tab or relax — we'll take it from here.";
+      messageBox.textContent = "✅ You're all checked in. You can now close this tab — we'll take it from here.";
 
       setTimeout(() => {
         window.location.href = "https://resolveperformance.com.au/";
