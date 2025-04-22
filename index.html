@@ -47,7 +47,7 @@
       margin-bottom: 1rem;
       color: #dfd8ce;
     }
-    input, select, button {
+    input, button {
       width: 100%;
       padding: 0.85rem;
       font-size: 1rem;
@@ -55,17 +55,6 @@
       margin: 0.5rem 0;
       box-sizing: border-box;
       font-family: 'Inter', sans-serif;
-    }
-    select {
-      border: 1px solid #ccc;
-      background-color: #f8fafc;
-      color: #253327;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-    }
-    
-    input {
       border: 1px solid #ccc;
       background-color: #f8fafc;
       color: #253327;
@@ -75,7 +64,6 @@
       color: #1e1e1e;
       font-weight: 600;
       font-size: 1.3rem;
-      font-family: 'Inter', sans-serif;
       border: none;
       cursor: pointer;
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -99,100 +87,94 @@
     <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance" class="logo">
     <h2 id="heading">CHECK IN</h2>
     <div id="form-section">
-    <select id="name" class="styled-input">
-      <option value="">Select your name</option>
-    </select><br />
-
+      <input type="text" id="first-name" placeholder="First Name" /><br />
+      <input type="text" id="last-name" placeholder="Last Name" /><br />
       <input type="email" id="email" placeholder="Your Email" /><br />
       <label style="display: flex; align-items: center; margin: 0.5rem 0; color: #dfd8ce; font-size: 0.95rem;">
         <input type="checkbox" id="first-session" style="width: auto; margin-right: 0.5rem;" />
         Is this your first session with your trainer?
       </label>
       <button onclick="saveClientInfo()">Save Info & Check In</button>
-
-      <script>
-  async function loadClientNames() {
-    try {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyQ-Z3470JQtpYqQ1iS1RnmhXOeBn--fnQhXnO0YUAtoSqdJHZbv4nMPVNGt3d0G3_w-A/exec");
-      const names = await res.json();
-      const dropdown = document.getElementById("name");
-      names.forEach(name => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        dropdown.appendChild(option);
-      });
-    } catch (e) {
-      console.error("Failed to load names:", e);
-    }
-  }
-
-  window.addEventListener("DOMContentLoaded", loadClientNames);
-</script>
-
     </div>
     <div id="checked-in" style="display:none;">
       <p id="checked-in-message">✅ You're all checked in. You can now close this tab — we'll take it from here.</p>
     </div>
   </div>
 
-<script>
-  async function saveClientInfo() {
-    const name = document.querySelector("#name").value.trim();
-    const email = document.querySelector("#email").value.trim();
-    const trainer = new URLSearchParams(window.location.search).get("trainer") || "Unknown";
-    const firstSession = document.querySelector("#first-session").checked;
-    const messageBox = document.querySelector("#checked-in-message");
-
-    if (!name || !email) {
-      alert("Please enter your name and email.");
-      return;
+  <script>
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     }
 
-    const today = new Date().toISOString().split("T")[0];
-    const lastCheckIn = localStorage.getItem("lastCheckInDate");
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedFirst = localStorage.getItem("firstName");
+      const savedLast = localStorage.getItem("lastName");
+      const savedEmail = localStorage.getItem("email");
 
-    if (lastCheckIn === today) {
-      messageBox.textContent = "You've already checked in today!";
-      document.querySelector("#form-section").style.display = "none";
-      document.querySelector("#checked-in").style.display = "block";
-      return;
+      if (savedFirst) document.querySelector("#first-name").value = savedFirst;
+      if (savedLast) document.querySelector("#last-name").value = savedLast;
+      if (savedEmail) document.querySelector("#email").value = savedEmail;
+    });
+
+    async function saveClientInfo() {
+      const firstName = document.querySelector("#first-name").value.trim();
+      const lastName = document.querySelector("#last-name").value.trim();
+      const email = document.querySelector("#email").value.trim();
+      const trainer = new URLSearchParams(window.location.search).get("trainer") || "Unknown";
+      const firstSession = document.querySelector("#first-session").checked;
+      const messageBox = document.querySelector("#checked-in-message");
+
+      if (!firstName || !lastName || !email) {
+        alert("Please enter your full name and email.");
+        return;
+      }
+
+      // Save user info to localStorage
+      localStorage.setItem("firstName", firstName);
+      localStorage.setItem("lastName", lastName);
+      localStorage.setItem("email", email);
+
+      const fullName = `${capitalize(firstName)} ${capitalize(lastName)}`;
+      const today = new Date().toISOString().split("T")[0];
+      const checkInKey = `checkin-${capitalize(firstName)}-${capitalize(lastName)}-${today}`;
+
+      if (localStorage.getItem(checkInKey)) {
+        messageBox.textContent = "You've already checked in today!";
+        document.querySelector("#form-section").style.display = "none";
+        document.querySelector("#checked-in").style.display = "block";
+        return;
+      }
+
+      localStorage.setItem(checkInKey, "true");
+
+      const payload = {
+        name: fullName,
+        email,
+        trainer,
+        firstSession: firstSession ? "Yes" : "No"
+      };
+
+      try {
+        await fetch("https://hook.eu2.make.com/dpflpcacoc2kw50np41jxui2lrx30hl8", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        localStorage.setItem("lastCheckInDate", today);
+        document.querySelector("#form-section").style.display = "none";
+        document.querySelector("#checked-in").style.display = "block";
+        messageBox.textContent = "✅ You're all checked in. You can now close this tab — we'll take it from here.";
+
+        setTimeout(() => {
+          window.location.href = "https://resolveperformance.com.au/";
+        }, 5000);
+      } catch (error) {
+        messageBox.textContent = "Something went wrong. Please try again.";
+        document.querySelector("#form-section").style.display = "none";
+        document.querySelector("#checked-in").style.display = "block";
+      }
     }
-
-    const payload = {
-      name,
-      email,
-      trainer,
-      firstSession: firstSession ? "Yes" : "No"
-    };
-
-    try {
-      await fetch("https://hook.eu2.make.com/dpflpcacoc2kw50np41jxui2lrx30hl8", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      localStorage.setItem("lastCheckInDate", today);
-      document.querySelector("#form-section").style.display = "none";
-      document.querySelector("#checked-in").style.display = "block";
-      messageBox.textContent = "✅ You're all checked in. You can now close this tab — we'll take it from here.";
-
-      setTimeout(() => {
-        window.location.href = "https://resolveperformance.com.au/";
-      }, 5000);
-    } catch (error) {
-      messageBox.textContent = "Something went wrong. Please try again.";
-      document.querySelector("#form-section").style.display = "none";
-      document.querySelector("#checked-in").style.display = "block";
-    }
-  }
-</script>
-
-
-
-
+  </script>
 </body>
 </html>
