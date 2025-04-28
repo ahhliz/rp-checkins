@@ -75,26 +75,60 @@
       font-weight: 600;
       margin-top: 1rem;
     }
-    .hidden {
-      display: none;
+    /* Loading Modal Overlay */
+    #loadingModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
+    .modal-content {
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+      text-align: center;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #dfd8ce;
+      border-top: 4px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
+<!-- Loading Modal -->
+<div id="loadingModal">
+  <div class="modal-content">
+    <div class="spinner"></div>
+    <p>Loading trainers...</p>
+  </div>
+</div>
+
 <div style="text-align: center; margin-bottom: 2rem;">
-  <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg"
-       alt="Resolve Performance Logo"
-       style="max-width: 220px;">
+  <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance Logo" style="max-width: 220px;">
 </div>
 
 <!-- Trainer selection -->
 <div class="container" id="trainerSelect" style="max-width: 400px;">
   <h1>Select Your Name</h1>
-  <select id="trainerName" style="margin-bottom: 1rem; font-size: 1rem; padding: 0.75rem;">
+  <select id="trainerName" disabled style="margin-bottom: 1rem; font-size: 1rem; padding: 0.75rem;">
     <option value="">-- Select Trainer --</option>
   </select>
   <div style="text-align: center;">
-    <button onclick="startSubmission()" style="font-size: 1.25rem;">Continue</button>
+    <button id="continueBtn" onclick="startSubmission()" disabled style="font-size: 1.25rem;">Continue</button>
   </div>
 </div>
 
@@ -104,37 +138,19 @@
   <div class="table-wrapper">
     <table id="hoursTable">
       <thead>
-      <tr>
-        <th>Date</th>
-        <th>Task</th>
-        <th>Notes</th>
-        <th style="width: 10%;">Hours</th>
-        <th>Delete</th>
-      </tr>
+      <tr><th>Date</th><th>Task</th><th>Notes</th><th style="width: 10%;">Hours</th><th>Delete</th></tr>
       </thead>
       <tbody id="tableBody">
       <tr>
-        <td><input type="date" /></td>
-        <td>
-          <select>
-            <option value="">-- Select Activity --</option>
-            <option>Marketing & Video Content</option>
-            <option>Team Training Sessions</option>
-            <option>Trainer Training</option>
-            <option>Meal Plans & Training Programs</option>
-            <option>Cleaning</option>
-            <option>Other</option>
-          </select>
-        </td>
-        <td><input type="text" placeholder="Details (optional)" /></td>
-        <td><input type="number" min="0" step="0.25" class="hourInput" /></td>
+        <td><input type="date"></td>
+        <td><select><option value="">-- Select Activity --</option><option>Marketing & Video Content</option><option>Team Training Sessions</option><option>Trainer Training</option><option>Meal Plans & Training Programs</option><option>Cleaning</option><option>Other</option></select></td>
+        <td><input type="text" placeholder="Details (optional)"></td>
+        <td><input type="number" min="0" step="0.25" class="hourInput"></td>
         <td class="delete-btn" onclick="deleteRow(this)">🗑️</td>
       </tr>
       </tbody>
     </table>
   </div>
-
-  <p id="errorDisplay" style="color: #ff6961; font-weight: 600; text-align: center; display: none;"></p>
   <button onclick="addRow()">Add Another Row</button>
   <button onclick="reviewSubmission()">Confirm</button>
   <p id="totalHours">Total Hours: 0</p>
@@ -145,25 +161,13 @@
   <h2>Submit Cancellations</h2>
   <div class="table-wrapper">
     <table id="cancellationsTable">
-      <thead>
-      <tr>
-        <th>Date</th>
-        <th style="width: 35%;">Client Name</th>
-        <th>Notes</th>
-        <th>Hours</th>
-        <th>Delete</th>
-      </tr>
-      </thead>
+      <thead><tr><th>Date</th><th style="width:35%;">Client Name</th><th>Notes</th><th>Hours</th><th>Delete</th></tr></thead>
       <tbody>
       <tr>
-        <td><input type="date" /></td>
-        <td style="width: 35%;">
-          <select class="clientDropdown">
-            <option value="">-- Select Client --</option>
-          </select>
-        </td>
-        <td><input type="text" placeholder="Details (optional)" /></td>
-        <td style="width: 10%;"><input type="number" min="0" step="0.25" /></td>
+        <td><input type="date"></td>
+        <td><select class="clientDropdown"><option value="">-- Select Client --</option></select></td>
+        <td><input type="text" placeholder="Details (optional)"></td>
+        <td><input type="number" min="0" step="0.25"></td>
         <td class="delete-btn" onclick="deleteRow(this)">🗑️</td>
       </tr>
       </tbody>
@@ -184,7 +188,6 @@
 
 <script>
   let selectedTrainer = "";
-
   function startSubmission() {
     const name = document.getElementById("trainerName").value;
     if (!name) return alert("Please select your name.");
@@ -193,107 +196,91 @@
     document.getElementById("trainerSelect").classList.add("hidden");
     document.getElementById("hourForm").classList.remove("hidden");
   }
-
   function addRow() {
     const table = document.getElementById("tableBody");
     const row = table.rows[0].cloneNode(true);
-    row.querySelectorAll("input, select").forEach(input => input.value = "");
+    row.querySelectorAll("input, select").forEach(i=> i.value = "");
     table.appendChild(row);
     updateTotal();
   }
-
   function deleteRow(el) {
     const row = el.closest("tr");
     const table = row.parentNode;
-    if (table.rows.length > 1) {
-      row.remove();
-      updateTotal();
-    } else {
-      alert("At least one row must remain.");
-    }
+    if (table.rows.length > 1) row.remove(), updateTotal(); else alert("At least one row must remain.");
   }
-
   function updateTotal() {
-    let total = 0;
-    document.querySelectorAll(".hourInput").forEach(input => {
-      const val = parseFloat(input.value);
-      if (!isNaN(val)) total += val;
-    });
+    let total=0;
+    document.querySelectorAll(".hourInput").forEach(i=>{ const v = parseFloat(i.value); if (!isNaN(v)) total+=v; });
     document.getElementById("totalHours").textContent = `Total Hours: ${total}`;
   }
-
   document.getElementById("tableBody").addEventListener("input", updateTotal);
-
   function reviewSubmission() {
     const rows = document.querySelectorAll("#tableBody tr");
-    let summaryHTML = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
-    let allValid = true;
-    rows.forEach(row => {
-      const date = row.cells[0].querySelector("input").value;
-      const task = row.cells[1].querySelector("select").value;
-      const hours = row.cells[3].querySelector("input").value;
-      if (!date || !task || !hours) allValid = false;
-      else {
-        const notes = row.cells[2].querySelector("input").value;
-        const formattedDate = new Date(date).toLocaleDateString('en-GB');
-        summaryHTML += `<li><strong>${formattedDate}</strong>: ${task} (${hours} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
+    let html = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
+    let valid = true;
+    rows.forEach(r=>{
+      const d = r.cells[0].querySelector("input").value;
+      const t = r.cells[1].querySelector("select").value;
+      const h = r.cells[3].querySelector("input").value;
+      if (!d||!t||!h) valid=false; else {
+        const n = r.cells[2].querySelector("input").value;
+        const fd = new Date(d).toLocaleDateString('en-GB');
+        html += `<li><strong>${fd}</strong>: ${t} (${h} hrs)` + (n?` - ${n}`:'') + `</li>`;
       }
     });
-    summaryHTML += `</ul>`;
-    if (!allValid) {
-      alert("Please fill in all required fields before continuing.");
-      return;
-    }
-    document.getElementById("summary").innerHTML = summaryHTML;
+    html += `</ul>`;
+    if (!valid) return alert("Please fill in all required fields before continuing.");
+    document.getElementById("summary").innerHTML = html;
     document.getElementById("hourForm").classList.add("hidden");
     document.getElementById("cancellationPage").classList.remove("hidden");
   }
-
   function addCancellationRow() {
-    const table = document.querySelector("#cancellationsTable tbody");
-    const row = table.rows[0].cloneNode(true);
-    row.querySelectorAll("input, select").forEach(input => input.value = "");
-    table.appendChild(row);
+    const tb = document.querySelector("#cancellationsTable tbody");
+    const row = tb.rows[0].cloneNode(true);
+    row.querySelectorAll("input, select").forEach(i=> i.value = "");
+    tb.appendChild(row);
   }
-
   function proceedToConfirmation() {
     const rows = document.querySelectorAll("#cancellationsTable tbody tr");
-    let summary = "<h2>Cancellations</h2><ul>";
-    rows.forEach(row => {
-      const date = row.cells[0].querySelector("input").value;
-      const client = row.cells[1].querySelector("select").value;
-      const hours = row.cells[3].querySelector("input").value;
-      if (date && client && hours) {
-        const notes = row.cells[2].querySelector("input").value;
-        const formattedDate = new Date(date).toLocaleDateString('en-GB');
-        summary += `<li>${formattedDate}: ${client} (${hours} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
+    let html = "<h2>Cancellations</h2><ul>";
+    rows.forEach(r=>{
+      const d = r.cells[0].querySelector("input").value;
+      const c = r.cells[1].querySelector("select").value;
+      const h = r.cells[3].querySelector("input").value;
+      if (d&&c&&h) {
+        const n = r.cells[2].querySelector("input").value;
+        const fd = new Date(d).toLocaleDateString('en-GB');
+        html += `<li>${fd}: ${c} (${h} hrs)` + (n?` - ${n}`:'') + `</li>`;
       }
     });
-    summary += "</ul>";
-    document.getElementById("cancellationSummary").innerHTML = summary;
+    html += "</ul>";
+    document.getElementById("cancellationSummary").innerHTML = html;
     document.getElementById("cancellationPage").classList.add("hidden");
     document.getElementById("confirmationPage").classList.remove("hidden");
   }
-
   function goBackToCancellations() {
     document.getElementById("confirmationPage").classList.add("hidden");
     document.getElementById("cancellationPage").classList.remove("hidden");
   }
 </script>
 
-<!-- DYNAMIC TRAINER POPULATION -->
+<!-- Dynamic Trainer Load -->
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
     const url = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhGrpXns9GE2lA0eWyQdKVfqWBhSXJDRFL0102xh_PilsXrprqIYEUJo7Y_jKa9EGDTGMqNdo2j0HW7OW4JIelwVQS0Qk3KfxjgA8CcWMjehTew0pljoYMCJoFiw0HuXNEYj0521NWf5TSBOQZSE61-wKmMT2ZMlydu7NLHETQF0G_XCth9DqiZ_tJ_NHXDljaWSsUZTimf5_stgY3HtcoGK1Eujd6LC-GXqULpmIyrdiiWJPKmAEVU9L-nqwfx12xe8s8GXPwyukoUgmKAST_vb8frFlANYA6w_0Kz&lib=MjTRnn9JtmhEyalh9NFjedpgJUstJXK7c';
+    const dropdown = document.getElementById('trainerName');
+    const modal = document.getElementById('loadingModal');
+    const continueBtn = document.getElementById('continueBtn');
+
+    dropdown.disabled = true;
+    continueBtn.disabled = true;
+    modal.style.display = 'flex';
 
     try {
       const res = await fetch(url);
       const data = await res.json();
-      const trainers = data.trainers ?? data;
-
-      const dropdown = document.getElementById('trainerName');
+      const trainers = data.trainers;
       dropdown.innerHTML = '<option value="">-- Select Trainer --</option>';
-
       trainers.forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
@@ -302,6 +289,11 @@
       });
     } catch (err) {
       console.error('Failed to load trainers:', err);
+      dropdown.innerHTML = '<option value="">Error loading trainers</option>';
+    } finally {
+      modal.style.display = 'none';
+      dropdown.disabled = false;
+      continueBtn.disabled = false;
     }
   });
 </script>
