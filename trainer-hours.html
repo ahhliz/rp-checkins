@@ -30,8 +30,7 @@
       border-collapse: collapse;
       margin-bottom: 1rem;
     }
-    .table-wrapper{
-
+    .table-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -46,6 +45,8 @@
       border-radius: 8px;
       border: none;
       box-sizing: border-box;
+      background-color: #2a2a2a;
+      color: #dfd8ce;
     }
     button {
       padding: 0.75rem 1.5rem;
@@ -81,41 +82,17 @@
 </head>
 <body>
 <div style="text-align: center; margin-bottom: 2rem;">
-  <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance Logo" style="max-width: 220px;">
+  <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg"
+       alt="Resolve Performance Logo"
+       style="max-width: 220px;">
 </div>
 
 <!-- Trainer selection -->
 <div class="container" id="trainerSelect" style="max-width: 400px;">
   <h1>Select Your Name</h1>
-  <!-- Hardcoded Trainer Dropdown -->
   <select id="trainerName" style="margin-bottom: 1rem; font-size: 1rem; padding: 0.75rem;">
     <option value="">-- Select Trainer --</option>
-    <option value="Jo">Jo</option>
-    <option value="Nathan">Nathan</option>
-    <option value="Alexa">Alexa</option>
-    <option value="Mia">Mia</option>
-    <option value="James">James</option>
   </select>
-
-  <!-- Optional Dynamic Dropdown Script (inactive) -->
-  <!--
-  <script>
-    fetch("https://hook.eu2.make.com/xt1tstwqfqiz44onrsuhdjhh4xl8lip4")
-      .then(res => res.json())
-      .then(data => {
-        const dropdown = document.getElementById("trainerName");
-        data.trainers.forEach(trainer => {
-          const opt = document.createElement("option");
-          opt.value = trainer;
-          opt.textContent = trainer;
-          dropdown.appendChild(opt);
-        });
-      })
-      .catch(err => {
-        console.error("Failed to load trainers", err);
-      });
-  </script>
-  -->
   <div style="text-align: center;">
     <button onclick="startSubmission()" style="font-size: 1.25rem;">Continue</button>
   </div>
@@ -166,33 +143,31 @@
 <!-- Cancellations Section -->
 <div class="container hidden" id="cancellationPage">
   <h2>Submit Cancellations</h2>
-
   <div class="table-wrapper">
-  <table id="cancellationsTable">
-    <thead>
-    <tr>
-      <th>Date</th>
-      <th style="width: 35%;">Client Name</th>
-      <th>Notes</th>
-      <th>Hours</th>
-      <th>Delete</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-      <td><input type="date" /></td>
-      <td style="width: 35%;">
-        <select class="clientDropdown">
-          <option value="">-- Select Client --</option>
-        </select>
-      </td>
-      <td><input type="text" placeholder="Details (optional)" /></td>
-      <td style="width: 10%;">
-        <input type="number" min="0" step="0.25" /></td>
-      <td class="delete-btn" onclick="deleteRow(this)">🗑️</td>
-    </tr>
-    </tbody>
-  </table>
+    <table id="cancellationsTable">
+      <thead>
+      <tr>
+        <th>Date</th>
+        <th style="width: 35%;">Client Name</th>
+        <th>Notes</th>
+        <th>Hours</th>
+        <th>Delete</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><input type="date" /></td>
+        <td style="width: 35%;">
+          <select class="clientDropdown">
+            <option value="">-- Select Client --</option>
+          </select>
+        </td>
+        <td><input type="text" placeholder="Details (optional)" /></td>
+        <td style="width: 10%;"><input type="number" min="0" step="0.25" /></td>
+        <td class="delete-btn" onclick="deleteRow(this)">🗑️</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
   <button onclick="addCancellationRow()">Add Another Cancellation</button>
   <button onclick="proceedToConfirmation()">Next</button>
@@ -253,7 +228,7 @@
     const rows = document.querySelectorAll("#tableBody tr");
     let summaryHTML = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
     let allValid = true;
-    rows.forEach((row, index) => {
+    rows.forEach(row => {
       const date = row.cells[0].querySelector("input").value;
       const task = row.cells[1].querySelector("select").value;
       const hours = row.cells[3].querySelector("input").value;
@@ -275,7 +250,7 @@
   }
 
   function addCancellationRow() {
-    const table = document.getElementById("cancellationsTable").querySelector("tbody");
+    const table = document.querySelector("#cancellationsTable tbody");
     const row = table.rows[0].cloneNode(true);
     row.querySelectorAll("input, select").forEach(input => input.value = "");
     table.appendChild(row);
@@ -304,6 +279,31 @@
     document.getElementById("confirmationPage").classList.add("hidden");
     document.getElementById("cancellationPage").classList.remove("hidden");
   }
+</script>
+
+<!-- DYNAMIC TRAINER POPULATION -->
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const url = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhGrpXns9GE2lA0eWyQdKVfqWBhSXJDRFL0102xh_PilsXrprqIYEUJo7Y_jKa9EGDTGMqNdo2j0HW7OW4JIelwVQS0Qk3KfxjgA8CcWMjehTew0pljoYMCJoFiw0HuXNEYj0521NWf5TSBOQZSE61-wKmMT2ZMlydu7NLHETQF0G_XCth9DqiZ_tJ_NHXDljaWSsUZTimf5_stgY3HtcoGK1Eujd6LC-GXqULpmIyrdiiWJPKmAEVU9L-nqwfx12xe8s8GXPwyukoUgmKAST_vb8frFlANYA6w_0Kz&lib=MjTRnn9JtmhEyalh9NFjedpgJUstJXK7c';
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const trainers = data.trainers ?? data;
+
+      const dropdown = document.getElementById('trainerName');
+      dropdown.innerHTML = '<option value="">-- Select Trainer --</option>';
+
+      trainers.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        dropdown.appendChild(opt);
+      });
+    } catch (err) {
+      console.error('Failed to load trainers:', err);
+    }
+  });
 </script>
 </body>
 </html>
