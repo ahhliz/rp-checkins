@@ -6,129 +6,65 @@
   <title>Trainer Hours Submission</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background-color: #1e1e1e;
-      color: #dfd8ce;
-      padding: 2rem;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background-color: #1e1e1e;
-      padding: 2rem;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    h1, h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-    .table-wrapper {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    th, td {
-      padding: 0.75rem;
-      border: 1px solid #dfd8ce;
-      text-align: left;
-    }
-    select, input[type="text"], input[type="date"], input[type="number"] {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 8px;
-      border: none;
-      box-sizing: border-box;
-      background-color: #2a2a2a;
-      color: #dfd8ce;
+    body { margin:0; font-family:'Inter',sans-serif; background:#1e1e1e; color:#dfd8ce; padding:2rem; }
+    .container { max-width:800px; margin:auto; background:#1e1e1e; padding:2rem; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+    h1,h2 { text-align:center; margin-bottom:1.5rem; }
+    .table-wrapper { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    table { width:100%; border-collapse:collapse; margin-bottom:1rem; }
+    th,td { padding:.75rem; border:1px solid #dfd8ce; text-align:left; }
+    select,input[type="text"],input[type="date"],input[type="number"] {
+      width:100%; padding:.5rem; border-radius:8px; border:none; box-sizing:border-box;
+      background:#2a2a2a; color:#dfd8ce;
     }
     button {
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      background-color: #dfd8ce;
-      color: #1e1e1e;
-      cursor: pointer;
-      margin: 1rem 0.5rem;
+      padding:.75rem 1.5rem; font-size:1rem; font-weight:600; border:none; border-radius:10px;
+      background:#dfd8ce; color:#1e1e1e; cursor:pointer; margin:1rem .5rem;
     }
-    button:hover {
-      background-color: #e5ded2;
-      box-shadow: 0 0 10px rgba(223, 216, 206, 0.4);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    .delete-btn {
-      color: #ff6961;
-      font-weight: bold;
-      font-size: 1.2rem;
-      cursor: pointer;
-      text-align: center;
-    }
-    #totalHours {
-      font-weight: 600;
-      margin-top: 1rem;
-    }
-    /* Loading Modal Overlay */
+    button:hover { background:#e5ded2; box-shadow:0 0 10px rgba(223,216,206,0.4); transition:background .3s, box-shadow .3s; }
+    .delete-btn { color:#ff6961; font-weight:bold; font-size:1.2rem; cursor:pointer; text-align:center; }
+    #totalHours { font-weight:600; margin-top:1rem; }
+
+    /* Loader Modal */
     #loadingModal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
+      position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
+      display:none; align-items:center; justify-content:center; z-index:1000;
     }
     .modal-content {
-      background: #1e1e1e;
-      padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
-      text-align: center;
+      background:#1e1e1e; padding:2rem; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.7); text-align:center;
     }
     .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #dfd8ce;
-      border-top: 4px solid transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1rem;
+      width:40px; height:40px; border:4px solid #dfd8ce; border-top:4px solid transparent;
+      border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 1rem;
     }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .hidden { display: none; }
+    @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+    .hidden { display:none; }
   </style>
 </head>
 <body>
-<!-- Loading Modal -->
+<!-- Loader Modal -->
 <div id="loadingModal">
   <div class="modal-content">
     <div class="spinner"></div>
-    <p>Loading trainers...</p>
+    <p id="loaderText">Loading…</p>
   </div>
 </div>
 
-<div style="text-align: center; margin-bottom: 2rem;">
-  <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg" alt="Resolve Performance Logo" style="max-width: 220px;">
+<div style="text-align:center; margin-bottom:2rem;">
+  <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg"
+       alt="Resolve Performance Logo" style="max-width:220px;">
 </div>
 
 <!-- Trainer selection -->
-<div class="container" id="trainerSelect" style="max-width: 400px;">
+<div class="container" id="trainerSelect" style="max-width:400px;">
   <h1>Select Your Name</h1>
-  <select id="trainerName" disabled style="margin-bottom: 1rem; font-size: 1rem; padding: 0.75rem;">
+  <select id="trainerName" disabled style="margin-bottom:1rem; font-size:1rem; padding:.75rem;">
     <option value="">-- Select Trainer --</option>
   </select>
-  <div style="text-align: center;">
-    <button id="continueBtn" onclick="startSubmission()" disabled style="font-size: 1.25rem;">Continue</button>
+  <div style="text-align:center;">
+    <button id="continueBtn" onclick="startSubmission()" disabled style="font-size:1.25rem;">
+      Continue
+    </button>
   </div>
 </div>
 
@@ -138,13 +74,15 @@
   <div class="table-wrapper">
     <table id="hoursTable">
       <thead>
-      <tr><th>Date</th><th>Task</th><th>Notes</th><th style="width: 10%;">Hours</th><th>Delete</th></tr>
+      <tr>
+        <th>Date</th><th>Task</th><th>Notes</th><th style="width:10%;">Hours</th><th>Delete</th>
+      </tr>
       </thead>
       <tbody id="tableBody">
       <tr>
-        <td><input type="date"></td>
+        <td><input type="date" name="date"></td>
         <td>
-          <select>
+          <select name="task">
             <option value="">-- Select Activity --</option>
             <option>Marketing & Video Content</option>
             <option>Team Training Sessions</option>
@@ -154,8 +92,8 @@
             <option>Other</option>
           </select>
         </td>
-        <td><input type="text" placeholder="Details (optional)"></td>
-        <td><input type="number" min="0" step="0.25" class="hourInput"></td>
+        <td><input type="text" name="notes" placeholder="Details (optional)"></td>
+        <td><input type="number" min="0" step="0.25" class="hourInput" name="duration"></td>
         <td class="delete-btn" onclick="deleteRow(this)">🗑️</td>
       </tr>
       </tbody>
@@ -172,7 +110,9 @@
   <div class="table-wrapper">
     <table id="cancellationsTable">
       <thead>
-      <tr><th>Date</th><th style="width:35%;">Client Name</th><th>Notes</th><th>Hours</th><th>Delete</th></tr>
+      <tr>
+        <th>Date</th><th style="width:35%;">Client Name</th><th>Notes</th><th>Hours</th><th>Delete</th>
+      </tr>
       </thead>
       <tbody>
       <tr>
@@ -203,11 +143,64 @@
 </div>
 
 <script>
-  // ✏️ Replace this with your actual Web-App /exec URL:
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby6sni7Au-ayYUKqFuJHFdlkAM5Gbz0r0qSTVHRMuWCH66Pas7qfy0ycY2DMO-qn4hiVw/exec';
+  const WEB_APP_URL    = 'https://script.google.com/macros/s/AKfycby6sni7Au-ayYUKqFuJHFdlkAM5Gbz0r0qSTVHRMuWCH66Pas7qfy0ycY2DMO-qn4hiVw/exec';
+  const trainerListUrl = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhGrpXns9GE2lA0eWyQdKVfqWBhSXJDRFL0102xh_PilsXrprqIYEUJo7Y_jKa9EGDTGMqNdo2j0HW7OW4JIelwVQS0Qk3KfxjgA8CcWMjehTew0pljoYMCJoFiw0HuXNEYj0521NWf5TSBOQZSE61-wKmMT2ZMlydu7NLHETQF0G_XCth9DqiZ_tJ_NHXDljaWSsUZTimf5_stgY3HtcoGK1Eujd6LC-GXqULpmIyrdiiWJPKmAEVU9L-nqwfx12xe8s8GXPwyukoUgmKAST_vb8frFlANYA6w_0Kz&lib=MjTRnn9JtmhEyalh9NFjedpgJUstJXK7c';
+  const clientListUrl  =   'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhgi6IKxtAjHHl5k-N5YeJUiBCdaNflK1PWeAWqRRTykgPWRob1P52JqXDLWxosVybd-dKSAJ0O3Nm_fgd6vftqlILlICuPbUS5vzUnfyh5AXtnBIvf7_81wX8r-D5SMBaSktjJouSOhN8NHI7A2w5cSzUK_J57IfNs5F30DNstG1ziU6XpOInzbXfGGDMFzaXikd9TXG08PuBLOIsEVX6tbM3SRweXz9kqOd92vFnQIwQu-U43nuOsOwGZiy3NKpDRa7n_zzMtogiZ5rTJfKvnfY3FEQ&lib=MJSm2V_17ROB0lhflEpfv5bI4s_AwMgT2';
+
+  let clients = [];
+
+  function showLoader(message) {
+    document.getElementById('loaderText').textContent = message;
+    document.getElementById('loadingModal').style.display = 'flex';
+  }
+  function hideLoader() {
+    document.getElementById('loadingModal').style.display = 'none';
+  }
+
+  function populateClientDropdown(select) {
+    select.innerHTML = '<option value="">-- Select Client --</option>';
+    clients.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+  }
+
+  async function loadTrainers() {
+    const dropdown = document.getElementById('trainerName');
+    dropdown.innerHTML = '<option value="">-- Select Trainer --</option>';
+    showLoader('Loading trainers…');
+    try {
+      const res  = await fetch(trainerListUrl);
+      const data = await res.json();
+      data.trainers.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        dropdown.appendChild(opt);
+      });
+    } catch (err) {
+      console.error(err);
+      dropdown.innerHTML = '<option value="">Error loading trainers</option>';
+    }
+    hideLoader();
+  }
+
+  async function loadClients() {
+    showLoader('Loading clients…');
+    try {
+      const res  = await fetch(clientListUrl);
+      const data = await res.json();
+      clients = data.clients || [];
+    } catch (err) {
+      console.error(err);
+    }
+    hideLoader();
+  }
 
   let selectedTrainer = '';
-  let weeklyEntries = [];
+  let weeklyEntries   = [];
   let cancellationEntries = [];
 
   function startSubmission() {
@@ -221,16 +214,16 @@
 
   function addRow() {
     const table = document.getElementById('tableBody');
-    const row = table.rows[0].cloneNode(true);
-    row.querySelectorAll('input, select').forEach(i=> i.value = '');
+    const row   = table.rows[0].cloneNode(true);
+    row.querySelectorAll('input, select').forEach(i => i.value = '');
     table.appendChild(row);
     updateTotal();
   }
 
   function deleteRow(el) {
     const row = el.closest('tr');
-    const table = row.parentNode;
-    if (table.rows.length > 1) {
+    const tbl = row.parentNode;
+    if (tbl.rows.length > 1) {
       row.remove();
       updateTotal();
     } else {
@@ -248,38 +241,29 @@
   }
   document.getElementById('tableBody').addEventListener('input', updateTotal);
 
-  function reviewSubmission() {
+  async function reviewSubmission() {
     weeklyEntries = [];
     const rows = document.querySelectorAll('#tableBody tr');
     let valid = true;
-    let html = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
-
+    let html  = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
     rows.forEach(r => {
       const date  = r.cells[0].querySelector('input').value;
       const task  = r.cells[1].querySelector('select').value;
       const notes = r.cells[2].querySelector('input').value;
       const hrs   = r.cells[3].querySelector('input').value;
-      if (!date || !task || !hrs) {
-        valid = false;
-      } else {
-        // push to batch
-        weeklyEntries.push({
-          date,
-          time: '',
-          trainer: selectedTrainer,
-          duration: hrs,
-          task,
-          notes,
-          cancelled: 'false'
-        });
-        // build summary HTML
+      if (!date || !task || !hrs) valid = false;
+      else {
+        weeklyEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, task, notes, cancelled:'false' });
         const fd = new Date(date).toLocaleDateString('en-GB');
-        html += `<li><strong>${fd}</strong>: ${task} (${hrs} hrs)` + (notes? ` - ${notes}` : '') + `</li>`;
+        html += `<li><strong>${fd}</strong>: ${task} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
       }
     });
     html += `</ul>`;
+    if (!valid) return alert('Please fill all required fields.');
 
-    if (!valid) return alert('Please fill in all required fields before continuing.');
+    // now load clients & populate
+    await loadClients();
+    document.querySelectorAll('.clientDropdown').forEach(sel => populateClientDropdown(sel));
 
     document.getElementById('summary').innerHTML = html;
     document.getElementById('hourForm').classList.add('hidden');
@@ -287,9 +271,10 @@
   }
 
   function addCancellationRow() {
-    const tb = document.querySelector('#cancellationsTable tbody');
+    const tb  = document.querySelector('#cancellationsTable tbody');
     const row = tb.rows[0].cloneNode(true);
-    row.querySelectorAll('input, select').forEach(i=> i.value = '');
+    row.querySelectorAll('input').forEach(i => i.value = '');
+    populateClientDropdown(row.querySelector('.clientDropdown'));
     tb.appendChild(row);
   }
 
@@ -297,29 +282,18 @@
     cancellationEntries = [];
     const rows = document.querySelectorAll('#cancellationsTable tbody tr');
     let html = '<h2>Cancellations</h2><ul>';
-
     rows.forEach(r => {
       const date   = r.cells[0].querySelector('input').value;
       const client = r.cells[1].querySelector('select').value;
       const notes  = r.cells[2].querySelector('input').value;
       const hrs    = r.cells[3].querySelector('input').value;
       if (date && client && hrs) {
-        cancellationEntries.push({
-          date,
-          time: '',
-          trainer: selectedTrainer,
-          duration: hrs,
-          client,
-          email: '',
-          notes,
-          cancelled: 'true'
-        });
+        cancellationEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, client, email:'', notes, cancelled:'true' });
         const fd = new Date(date).toLocaleDateString('en-GB');
-        html += `<li>${fd}: ${client} (${hrs} hrs)` + (notes? ` - ${notes}` : '') + `</li>`;
+        html += `<li>${fd}: ${client} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
       }
     });
-    html += `</ul>`;
-
+    html += '</ul>';
     document.getElementById('cancellationSummary').innerHTML = html;
     document.getElementById('cancellationPage').classList.add('hidden');
     document.getElementById('confirmationPage').classList.remove('hidden');
@@ -331,60 +305,31 @@
   }
 
   async function submitForm() {
+    showLoader('Submitting…');
     try {
-      // send weekly sessions
       for (let row of weeklyEntries) {
-        await fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: new URLSearchParams(row)
-        });
+        await fetch(WEB_APP_URL, { method:'POST', body:new URLSearchParams(row) });
       }
-      // send cancellations
       for (let row of cancellationEntries) {
-        await fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: new URLSearchParams(row)
-        });
+        await fetch(WEB_APP_URL, { method:'POST', body:new URLSearchParams(row) });
       }
+      hideLoader();
       alert('All done! 👍');
       window.location.reload();
     } catch (err) {
+      hideLoader();
       console.error(err);
-      alert('Something went wrong submitting your data.');
+      alert('Submission failed.');
     }
   }
 
-  // ─── Load Trainers Dynamically ─────────────────────────────────────
+  // INITIAL LOAD: only trainers
   document.addEventListener('DOMContentLoaded', async () => {
-    const dropdown = document.getElementById('trainerName');
-    const continueBtn = document.getElementById('continueBtn');
-    const modal = document.getElementById('loadingModal');
-
-    dropdown.disabled = true;
-    continueBtn.disabled = true;
-    modal.style.display = 'flex';
-
-    // your own echo/web-app URL returning { trainers: [ 'Mia', 'Alexa', ... ] }
-    const trainerListUrl = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhGrpXns9GE2lA0eWyQdKVfqWBhSXJDRFL0102xh_PilsXrprqIYEUJo7Y_jKa9EGDTGMqNdo2j0HW7OW4JIelwVQS0Qk3KfxjgA8CcWMjehTew0pljoYMCJoFiw0HuXNEYj0521NWf5TSBOQZSE61-wKmMT2ZMlydu7NLHETQF0G_XCth9DqiZ_tJ_NHXDljaWSsUZTimf5_stgY3HtcoGK1Eujd6LC-GXqULpmIyrdiiWJPKmAEVU9L-nqwfx12xe8s8GXPwyukoUgmKAST_vb8frFlANYA6w_0Kz&lib=MjTRnn9JtmhEyalh9NFjedpgJUstJXK7c';
-
-    try {
-      const res = await fetch(trainerListUrl);
-      const data = await res.json();
-      dropdown.innerHTML = '<option value="">-- Select Trainer --</option>';
-      data.trainers.forEach(name => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        dropdown.appendChild(opt);
-      });
-    } catch (err) {
-      console.error('Failed to load trainers:', err);
-      dropdown.innerHTML = '<option value="">Error loading trainers</option>';
-    } finally {
-      modal.style.display = 'none';
-      dropdown.disabled = false;
-      continueBtn.disabled = false;
-    }
+    document.getElementById('trainerName').disabled   = true;
+    document.getElementById('continueBtn').disabled = true;
+    await loadTrainers();
+    document.getElementById('trainerName').disabled   = false;
+    document.getElementById('continueBtn').disabled = false;
   });
 </script>
 </body>
