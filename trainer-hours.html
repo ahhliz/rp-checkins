@@ -251,7 +251,7 @@
       const task  = r.cells[1].querySelector('select').value;
       const notes = r.cells[2].querySelector('input').value;
       const hrs   = r.cells[3].querySelector('input').value;
-      if (!date || !task || !hrs) valid = false;
+      if (!date || !task || !hrs) return;
       else {
         weeklyEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, task, notes, cancelled:'false' });
         const fd = new Date(date).toLocaleDateString('en-GB');
@@ -259,13 +259,15 @@
       }
     });
     html += </ul>;
-    if (!valid) return alert('Please fill all required fields.');
 
     // now load clients & populate
     await loadClients();
     document.querySelectorAll('.clientDropdown').forEach(sel => populateClientDropdown(sel));
 
     document.getElementById('summary').innerHTML = html;
+    if (weeklyEntries.length === 0) {
+      document.getElementById('summary').innerHTML += '<li><em>No weekly hours entered.</em></li>';
+    }
     document.getElementById('hourForm').classList.add('hidden');
     document.getElementById('cancellationPage').classList.remove('hidden');
   }
@@ -291,6 +293,9 @@
         cancellationEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, client, email:'', notes, cancelled:'true' });
         const fd = new Date(date).toLocaleDateString('en-GB');
         html += <li>${fd}: ${client} (${hrs} hrs) + (notes ?  - ${notes} : '') + </li>;
+      }
+      if (weeklyEntries.length === 0 && cancellationEntries.length === 0) {
+        document.getElementById('cancellationSummary').innerHTML = '<ul><li><em>No cancellations entered.</em></li></ul>';
       }
     });
     html += '</ul>';
