@@ -23,14 +23,37 @@
     button:hover { background:#e5ded2; box-shadow:0 0 10px rgba(223,216,206,0.4); transition:background .3s, box-shadow .3s; }
     .delete-btn { color:#ff6961; font-weight:bold; font-size:1.2rem; cursor:pointer; text-align:center; }
     #totalHours { font-weight:600; margin-top:1rem; }
-    #loadingModal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000; }
-    .modal-content { background:#1e1e1e; padding:2rem; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.7); text-align:center; }
-    .spinner { width:40px; height:40px; border:4px solid #dfd8ce; border-top:4px solid transparent; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 1rem; }
+
+    /* Loader Modal */
+    #loadingModal {
+      position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
+      display:none; align-items:center; justify-content:center; z-index:1000;
+    }
+    .modal-content {
+      background:#1e1e1e; padding:2rem; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.7); text-align:center;
+    }
+    .spinner {
+      width:40px; height:40px; border:4px solid #dfd8ce; border-top:4px solid transparent;
+      border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 1rem;
+    }
     @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
     .hidden { display:none; }
   </style>
 </head>
 <body>
+<!-- Loader Modal -->
+<div id="loadingModal">
+  <div class="modal-content">
+    <div class="spinner"></div>
+    <p id="loaderText">Loading…</p>
+  </div>
+</div>
+
+<div style="text-align:center; margin-bottom:2rem;">
+  <img src="https://resolveperformance.com.au/wp-content/uploads/2024/10/RESOLVE-PERFORMANCE-site-logo.svg"
+       alt="Resolve Performance Logo" style="max-width:220px;">
+</div>
 
 <!-- Trainer selection -->
 <div class="container" id="trainerSelect" style="max-width:400px;">
@@ -39,50 +62,275 @@
     <option value="">-- Select Trainer --</option>
   </select>
   <div style="text-align:center;">
-    <button id="continueBtn" disabled style="font-size:1.25rem;" onclick="showSubmissionType()">
+    <button id="continueBtn" onclick="startSubmission()" disabled style="font-size:1.25rem;">
       Continue
     </button>
   </div>
 </div>
 
-<!-- Submission Type Selection -->
-<div class="container hidden" id="submissionType">
-  <h1>What are you submitting today?</h1>
-  <div style="text-align:center;">
-    <button onclick="startSubmission('hours')">Only Weekly Hours</button>
-    <button onclick="startSubmission('cxl')">Only Cancellations</button>
-    <button onclick="startSubmission('both')">Both</button>
+<!-- Weekly Hours Section -->
+<div class="container hidden" id="hourForm">
+  <h2 id="formHeader">Submit Weekly Hours</h2>
+  <div class="table-wrapper">
+    <table id="hoursTable">
+      <thead>
+      <tr>
+        <th>Date</th><th>Task</th><th>Notes</th><th style="width:10%;">Hours</th><th>Delete</th>
+      </tr>
+      </thead>
+      <tbody id="tableBody">
+      <tr>
+        <td><input type="date" name="date"></td>
+        <td>
+          <select name="task">
+            <option value="">-- Select Activity --</option>
+            <option>Marketing & Video Content</option>
+            <option>Team Training Sessions</option>
+            <option>Trainer Training</option>
+            <option>Meal Plans & Training Programs</option>
+            <option>Cleaning</option>
+            <option>Other</option>
+          </select>
+        </td>
+        <td><input type="text" name="notes" placeholder="Details (optional)"></td>
+        <td><input type="number" min="0" step="0.25" class="hourInput" name="duration"></td>
+        <td class="delete-btn" onclick="deleteRow(this)">🗑️</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
+  <button onclick="addRow()">Add Another Row</button>
+  <button onclick="reviewSubmission()">Confirm</button>
+  <p id="totalHours">Total Hours: 0</p>
+</div>
+
+<!-- Cancellations Section -->
+<div class="container hidden" id="cancellationPage">
+  <h2>Submit Cancellations</h2>
+  <div class="table-wrapper">
+    <table id="cancellationsTable">
+      <thead>
+      <tr>
+        <th>Date</th><th style="width:35%;">Client Name</th><th>Notes</th><th>Hours</th><th>Delete</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><input type="date"></td>
+        <td>
+          <select class="clientDropdown">
+            <option value="">-- Select Client --</option>
+          </select>
+        </td>
+        <td><input type="text" placeholder="Details (optional)"></td>
+        <td><input type="number" min="0" step="0.25"></td>
+        <td class="delete-btn" onclick="deleteRow(this)">🗑️</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <button onclick="addCancellationRow()">Add Another Cancellation</button>
+  <button onclick="proceedToConfirmation()">Next</button>
+</div>
+
+<!-- Confirmation Section -->
+<div class="container hidden" id="confirmationPage">
+  <h1>Confirm Your Submission</h1>
+  <div id="summary"></div>
+  <div id="cancellationSummary"></div>
+  <button onclick="submitForm()">Confirm</button>
+  <button onclick="goBackToCancellations()">Go Back</button>
 </div>
 
 <script>
-  let selectedTrainer = '';
-  let submissionMode = '';
+  const WEB_APP_URL    = 'https://script.google.com/macros/s/AKfycby6sni7Au-ayYUKqFuJHFdlkAM5Gbz0r0qSTVHRMuWCH66Pas7qfy0ycY2DMO-qn4hiVw/exec';
+  const trainerListUrl = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhGrpXns9GE2lA0eWyQdKVfqWBhSXJDRFL0102xh_PilsXrprqIYEUJo7Y_jKa9EGDTGMqNdo2j0HW7OW4JIelwVQS0Qk3KfxjgA8CcWMjehTew0pljoYMCJoFiw0HuXNEYj0521NWf5TSBOQZSE61-wKmMT2ZMlydu7NLHETQF0G_XCth9DqiZ_tJ_NHXDljaWSsUZTimf5_stgY3HtcoGK1Eujd6LC-GXqULpmIyrdiiWJPKmAEVU9L-nqwfx12xe8s8GXPwyukoUgmKAST_vb8frFlANYA6w_0Kz&lib=MjTRnn9JtmhEyalh9NFjedpgJUstJXK7c';
+  const clientListUrl  =   'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhgi6IKxtAjHHl5k-N5YeJUiBCdaNflK1PWeAWqRRTykgPWRob1P52JqXDLWxosVybd-dKSAJ0O3Nm_fgd6vftqlILlICuPbUS5vzUnfyh5AXtnBIvf7_81wX8r-D5SMBaSktjJouSOhN8NHI7A2w5cSzUK_J57IfNs5F30DNstG1ziU6XpOInzbXfGGDMFzaXikd9TXG08PuBLOIsEVX6tbM3SRweXz9kqOd92vFnQIwQu-U43nuOsOwGZiy3NKpDRa7n_zzMtogiZ5rTJfKvnfY3FEQ&lib=MJSm2V_17ROB0lhflEpfv5bI4s_AwMgT2';
 
-  function showSubmissionType() {
+  let clients = [];
+
+  function showLoader(message) {
+    document.getElementById('loaderText').textContent = message;
+    document.getElementById('loadingModal').style.display = 'flex';
+  }
+  function hideLoader() {
+    document.getElementById('loadingModal').style.display = 'none';
+  }
+
+  function populateClientDropdown(select) {
+    select.innerHTML = '<option value="">-- Select Client --</option>';
+    clients.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+  }
+
+  async function loadTrainers() {
+    const dropdown = document.getElementById('trainerName');
+    dropdown.innerHTML = '<option value="">-- Select Trainer --</option>';
+    showLoader('Loading trainers…');
+    try {
+      const res  = await fetch(trainerListUrl);
+      const data = await res.json();
+      data.trainers.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        dropdown.appendChild(opt);
+      });
+    } catch (err) {
+      console.error(err);
+      dropdown.innerHTML = '<option value="">Error loading trainers</option>';
+    }
+    hideLoader();
+  }
+
+  async function loadClients() {
+    showLoader('Loading clients…');
+    try {
+      const res  = await fetch(clientListUrl);
+      const data = await res.json();
+      clients = data.clients || [];
+    } catch (err) {
+      console.error(err);
+    }
+    hideLoader();
+  }
+
+  let selectedTrainer = '';
+  let weeklyEntries   = [];
+  let cancellationEntries = [];
+
+  function startSubmission() {
     const name = document.getElementById('trainerName').value;
     if (!name) return alert('Please select your name.');
     selectedTrainer = name;
+    document.getElementById('formHeader').innerText = `Submit Weekly Hours — ${selectedTrainer}`;
     document.getElementById('trainerSelect').classList.add('hidden');
-    document.getElementById('submissionType').classList.remove('hidden');
+    document.getElementById('hourForm').classList.remove('hidden');
   }
 
-  function startSubmission(mode) {
-    submissionMode = mode;
-    document.getElementById('submissionType').classList.add('hidden');
+  function addRow() {
+    const table = document.getElementById('tableBody');
+    const row   = table.rows[0].cloneNode(true);
+    row.querySelectorAll('input, select').forEach(i => i.value = '');
+    table.appendChild(row);
+    updateTotal();
+  }
 
-    if (mode === 'hours') {
-      document.getElementById('hourForm').classList.remove('hidden');
-    } else if (mode === 'cxl') {
-      loadClients().then(() => {
-        document.querySelectorAll('.clientDropdown').forEach(sel => populateClientDropdown(sel));
-        document.getElementById('cancellationPage').classList.remove('hidden');
-      });
-    } else if (mode === 'both') {
-      document.getElementById('hourForm').classList.remove('hidden');
+  function deleteRow(el) {
+    const row = el.closest('tr');
+    const tbl = row.parentNode;
+    if (tbl.rows.length > 1) {
+      row.remove();
+      updateTotal();
+    } else {
+      alert('At least one row must remain.');
     }
   }
-</script>
 
+  function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.hourInput').forEach(i => {
+      const v = parseFloat(i.value);
+      if (!isNaN(v)) total += v;
+    });
+    document.getElementById('totalHours').textContent = `Total Hours: ${total}`;
+  }
+  document.getElementById('tableBody').addEventListener('input', updateTotal);
+
+  async function reviewSubmission() {
+    weeklyEntries = [];
+    const rows = document.querySelectorAll('#tableBody tr');
+    let valid = true;
+    let html  = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
+    rows.forEach(r => {
+      const date  = r.cells[0].querySelector('input').value;
+      const task  = r.cells[1].querySelector('select').value;
+      const notes = r.cells[2].querySelector('input').value;
+      const hrs   = r.cells[3].querySelector('input').value;
+      if (!date || !task || !hrs) valid = false;
+      else {
+        weeklyEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, task, notes, cancelled:'false' });
+        const fd = new Date(date).toLocaleDateString('en-GB');
+        html += `<li><strong>${fd}</strong>: ${task} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
+      }
+    });
+    html += `</ul>`;
+    if (!valid) return alert('Please fill all required fields.');
+
+    // now load clients & populate
+    await loadClients();
+    document.querySelectorAll('.clientDropdown').forEach(sel => populateClientDropdown(sel));
+
+    document.getElementById('summary').innerHTML = html;
+    document.getElementById('hourForm').classList.add('hidden');
+    document.getElementById('cancellationPage').classList.remove('hidden');
+  }
+
+  function addCancellationRow() {
+    const tb  = document.querySelector('#cancellationsTable tbody');
+    const row = tb.rows[0].cloneNode(true);
+    row.querySelectorAll('input').forEach(i => i.value = '');
+    populateClientDropdown(row.querySelector('.clientDropdown'));
+    tb.appendChild(row);
+  }
+
+  function proceedToConfirmation() {
+    cancellationEntries = [];
+    const rows = document.querySelectorAll('#cancellationsTable tbody tr');
+    let html = '<h2>Cancellations</h2><ul>';
+    rows.forEach(r => {
+      const date   = r.cells[0].querySelector('input').value;
+      const client = r.cells[1].querySelector('select').value;
+      const notes  = r.cells[2].querySelector('input').value;
+      const hrs    = r.cells[3].querySelector('input').value;
+      if (date && client && hrs) {
+        cancellationEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, client, email:'', notes, cancelled:'true' });
+        const fd = new Date(date).toLocaleDateString('en-GB');
+        html += `<li>${fd}: ${client} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
+      }
+    });
+    html += '</ul>';
+    document.getElementById('cancellationSummary').innerHTML = html;
+    document.getElementById('cancellationPage').classList.add('hidden');
+    document.getElementById('confirmationPage').classList.remove('hidden');
+  }
+
+  function goBackToCancellations() {
+    document.getElementById('confirmationPage').classList.add('hidden');
+    document.getElementById('cancellationPage').classList.remove('hidden');
+  }
+
+  async function submitForm() {
+    showLoader('Submitting…');
+    try {
+      for (let row of weeklyEntries) {
+        await fetch(WEB_APP_URL, { method:'POST', body:new URLSearchParams(row) });
+      }
+      for (let row of cancellationEntries) {
+        await fetch(WEB_APP_URL, { method:'POST', body:new URLSearchParams(row) });
+      }
+      hideLoader();
+      alert('All done! 👍');
+      window.location.reload();
+    } catch (err) {
+      hideLoader();
+      console.error(err);
+      alert('Submission failed.');
+    }
+  }
+
+  // INITIAL LOAD: only trainers
+  document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('trainerName').disabled   = true;
+    document.getElementById('continueBtn').disabled = true;
+    await loadTrainers();
+    document.getElementById('trainerName').disabled   = false;
+    document.getElementById('continueBtn').disabled = false;
+  });
+</script>
 </body>
 </html>
