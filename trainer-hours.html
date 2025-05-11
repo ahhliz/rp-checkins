@@ -62,50 +62,11 @@
     <option value="">-- Select Trainer --</option>
   </select>
   <div style="text-align:center;">
-    <button id="continueBtn" disabled style="font-size:1.25rem;" onclick="showSubmissionType()">
+    <button id="continueBtn" onclick="startSubmission()" disabled style="font-size:1.25rem;">
       Continue
     </button>
   </div>
 </div>
-
-<!-- Submission Type Selection -->
-<div class="container hidden" id="submissionType">
-  <h1>What are you submitting today?</h1>
-  <div style="text-align:center;">
-    <button onclick="startSubmission('hours')">Only Weekly Hours</button>
-    <button onclick="startSubmission('cxl')">Only Cancellations</button>
-    <button onclick="startSubmission('both')">Both</button>
-  </div>
-</div>
-
-<script>
-  let selectedTrainer = '';
-  let submissionMode = '';
-
-  function showSubmissionType() {
-    const name = document.getElementById('trainerName').value;
-    if (!name) return alert('Please select your name.');
-    selectedTrainer = name;
-    document.getElementById('trainerSelect').classList.add('hidden');
-    document.getElementById('submissionType').classList.remove('hidden');
-  }
-
-  function startSubmission(mode) {
-    submissionMode = mode;
-    document.getElementById('submissionType').classList.add('hidden');
-
-    if (mode === 'hours') {
-      document.getElementById('hourForm').classList.remove('hidden');
-    } else if (mode === 'cxl') {
-      loadClients().then(() => {
-        document.querySelectorAll('.clientDropdown').forEach(sel => populateClientDropdown(sel));
-        document.getElementById('cancellationPage').classList.remove('hidden');
-      });
-    } else if (mode === 'both') {
-      document.getElementById('hourForm').classList.remove('hidden');
-    }
-  }
-</script>
 
 <!-- Weekly Hours Section -->
 <div class="container hidden" id="hourForm">
@@ -246,7 +207,7 @@
     const name = document.getElementById('trainerName').value;
     if (!name) return alert('Please select your name.');
     selectedTrainer = name;
-    document.getElementById('formHeader').innerText = `Submit Weekly Hours — ${selectedTrainer}`;
+    document.getElementById('formHeader').innerText = Submit Weekly Hours — ${selectedTrainer};
     document.getElementById('trainerSelect').classList.add('hidden');
     document.getElementById('hourForm').classList.remove('hidden');
   }
@@ -276,7 +237,7 @@
       const v = parseFloat(i.value);
       if (!isNaN(v)) total += v;
     });
-    document.getElementById('totalHours').textContent = `Total Hours: ${total}`;
+    document.getElementById('totalHours').textContent = Total Hours: ${total};
   }
   document.getElementById('tableBody').addEventListener('input', updateTotal);
 
@@ -284,7 +245,7 @@
     weeklyEntries = [];
     const rows = document.querySelectorAll('#tableBody tr');
     let valid = true;
-    let html  = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
+    let html  = <h2>Trainer: ${selectedTrainer}</h2><ul>;
     rows.forEach(r => {
       const date  = r.cells[0].querySelector('input').value;
       const task  = r.cells[1].querySelector('select').value;
@@ -294,10 +255,10 @@
       else {
         weeklyEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, task, notes, cancelled:'false' });
         const fd = new Date(date).toLocaleDateString('en-GB');
-        html += `<li><strong>${fd}</strong>: ${task} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
+        html += <li><strong>${fd}</strong>: ${task} (${hrs} hrs) + (notes ?  - ${notes} : '') + </li>;
       }
     });
-    html += `</ul>`;
+    html += </ul>;
     if (!valid) return alert('Please fill all required fields.');
 
     // now load clients & populate
@@ -306,13 +267,7 @@
 
     document.getElementById('summary').innerHTML = html;
     document.getElementById('hourForm').classList.add('hidden');
-
-    if (submissionMode === 'both') {
-      document.getElementById('cancellationPage').classList.remove('hidden');
-    } else {
-      document.getElementById('confirmationPage').classList.remove('hidden');
-    }
-
+    document.getElementById('cancellationPage').classList.remove('hidden');
   }
 
   function addCancellationRow() {
@@ -335,7 +290,7 @@
       if (date && client && hrs) {
         cancellationEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, client, email:'', notes, cancelled:'true' });
         const fd = new Date(date).toLocaleDateString('en-GB');
-        html += `<li>${fd}: ${client} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
+        html += <li>${fd}: ${client} (${hrs} hrs) + (notes ?  - ${notes} : '') + </li>;
       }
     });
     html += '</ul>';
