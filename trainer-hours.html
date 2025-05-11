@@ -62,11 +62,50 @@
     <option value="">-- Select Trainer --</option>
   </select>
   <div style="text-align:center;">
-    <button id="continueBtn" onclick="startSubmission()" disabled style="font-size:1.25rem;">
+    <button id="continueBtn" disabled style="font-size:1.25rem;" onclick="showSubmissionType()">
       Continue
     </button>
   </div>
 </div>
+
+<!-- Submission Type Selection -->
+<div class="container hidden" id="submissionType">
+  <h1>What are you submitting today?</h1>
+  <div style="text-align:center;">
+    <button onclick="startSubmission('hours')">Only Weekly Hours</button>
+    <button onclick="startSubmission('cxl')">Only Cancellations</button>
+    <button onclick="startSubmission('both')">Both</button>
+  </div>
+</div>
+
+<script>
+  let selectedTrainer = '';
+  let submissionMode = '';
+
+  function showSubmissionType() {
+    const name = document.getElementById('trainerName').value;
+    if (!name) return alert('Please select your name.');
+    selectedTrainer = name;
+    document.getElementById('trainerSelect').classList.add('hidden');
+    document.getElementById('submissionType').classList.remove('hidden');
+  }
+
+  function startSubmission(mode) {
+    submissionMode = mode;
+    document.getElementById('submissionType').classList.add('hidden');
+
+    if (mode === 'hours') {
+      document.getElementById('hourForm').classList.remove('hidden');
+    } else if (mode === 'cxl') {
+      loadClients().then(() => {
+        document.querySelectorAll('.clientDropdown').forEach(sel => populateClientDropdown(sel));
+        document.getElementById('cancellationPage').classList.remove('hidden');
+      });
+    } else if (mode === 'both') {
+      document.getElementById('hourForm').classList.remove('hidden');
+    }
+  }
+</script>
 
 <!-- Weekly Hours Section -->
 <div class="container hidden" id="hourForm">
@@ -267,7 +306,13 @@
 
     document.getElementById('summary').innerHTML = html;
     document.getElementById('hourForm').classList.add('hidden');
-    document.getElementById('cancellationPage').classList.remove('hidden');
+
+    if (submissionMode === 'both') {
+      document.getElementById('cancellationPage').classList.remove('hidden');
+    } else {
+      document.getElementById('confirmationPage').classList.remove('hidden');
+    }
+
   }
 
   function addCancellationRow() {
