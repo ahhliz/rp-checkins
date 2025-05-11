@@ -207,7 +207,7 @@
     const name = document.getElementById('trainerName').value;
     if (!name) return alert('Please select your name.');
     selectedTrainer = name;
-    document.getElementById('formHeader').innerText = Submit Weekly Hours — ${selectedTrainer};
+    document.getElementById('formHeader').innerText = `Submit Weekly Hours — ${selectedTrainer}`;
     document.getElementById('trainerSelect').classList.add('hidden');
     document.getElementById('hourForm').classList.remove('hidden');
   }
@@ -237,7 +237,7 @@
       const v = parseFloat(i.value);
       if (!isNaN(v)) total += v;
     });
-    document.getElementById('totalHours').textContent = Total Hours: ${total};
+    document.getElementById('totalHours').textContent = `Total Hours: ${total}`;
   }
   document.getElementById('tableBody').addEventListener('input', updateTotal);
 
@@ -245,7 +245,7 @@
     weeklyEntries = [];
     const rows = document.querySelectorAll('#tableBody tr');
     let valid = true;
-    let html  = <h2>Trainer: ${selectedTrainer}</h2><ul>;
+    let html  = `<h2>Trainer: ${selectedTrainer}</h2><ul>`;
     rows.forEach(r => {
       const date  = r.cells[0].querySelector('input').value;
       const task  = r.cells[1].querySelector('select').value;
@@ -255,10 +255,10 @@
       else {
         weeklyEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, task, notes, cancelled:'false' });
         const fd = new Date(date).toLocaleDateString('en-GB');
-        html += <li><strong>${fd}</strong>: ${task} (${hrs} hrs) + (notes ?  - ${notes} : '') + </li>;
+        html += `<li><strong>${fd}</strong>: ${task} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
       }
     });
-    html += </ul>;
+    html += `</ul>`;
     if (!valid) return alert('Please fill all required fields.');
 
     // now load clients & populate
@@ -290,7 +290,7 @@
       if (date && client && hrs) {
         cancellationEntries.push({ date, time:'', trainer:selectedTrainer, duration:hrs, client, email:'', notes, cancelled:'true' });
         const fd = new Date(date).toLocaleDateString('en-GB');
-        html += <li>${fd}: ${client} (${hrs} hrs) + (notes ?  - ${notes} : '') + </li>;
+        html += `<li>${fd}: ${client} (${hrs} hrs)` + (notes ? ` - ${notes}` : '') + `</li>`;
       }
     });
     html += '</ul>';
